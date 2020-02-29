@@ -1,2 +1,3 @@
 # coffee-roulette
-Coffee roulette app script for DIGITAL@BP
+Coffee roulette app script.
+Target team <100 people.
