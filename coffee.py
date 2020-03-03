@@ -5,6 +5,17 @@ import random
 from datetime import date
 from operator import itemgetter
 
+##################################################
+## Coffee roullete script for Digital@BP account
+##################################################
+## Author: Naglis J. Kazlauskas
+## Copyright: 2020, Coffee-roulette script
+## Version: 1.0.0
+## Mmaintainer: Naglis J.Kazlauskas
+## Email: naglis.kazlauskas@ibm.com
+## Status: Testing phase
+##################################################
+
 def read_csv_file(path_to_file, new_line = ''):
     csv_file = csv.reader(open(path_to_file, newline=new_line))
     return csv_file
