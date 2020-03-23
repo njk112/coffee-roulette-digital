@@ -27,11 +27,11 @@ def read_json_file(path_to_file):
     json_file = json.load(open(path_to_file, 'r'))
     return json_file
 
-def write_json_file(json_obj = None):
+def write_json_file(json_obj = None, file_name = 'matched_people.json'):
     if json_obj:
-        json.dump(json_obj, open('matched_people.json', 'w'))
+        json.dump(json_obj, open(file_name, 'w'))
     else:
-        json.dump({}, open('matched_people.json', 'w'))
+        json.dump({}, open(file_name, 'w'))
 
 def update_current_json(current_json, todays_matches, n=2):
     for x, y in grouped_for(todays_matches, n):
@@ -49,7 +49,6 @@ def flat_list(all_people_list):
     flat_pair = [item for sublist in all_people_list for item in sublist]
     return flat_pair
 
-
 def invidual_preproc(person, all_people_list, matched_people_json, matched_this_session):
     individual_match_list = all_people_list.copy()
     persons_previous_matches = []
@@ -58,14 +57,18 @@ def invidual_preproc(person, all_people_list, matched_people_json, matched_this_
             persons_previous_matches = matched_people_json.get(person)
         except:
             pass
-        
     individual_match_list.remove(person)
-    for person in matched_this_session:
+
+    if individual_match_list:
+        for person in matched_this_session:
+            try:
+                individual_match_list.remove(person)
+            except:
+                pass
         try:
-            individual_match_list.remove(person)
+            [individual_match_list.remove(person) for person in persons_previous_matches if person in individual_match_list]
         except:
             pass
-    [individual_match_list.remove(person) for person in persons_previous_matches if person in individual_match_list]
     return individual_match_list
     
 def coffee_roulette(person, individual_match_list):
@@ -73,7 +76,7 @@ def coffee_roulette(person, individual_match_list):
         random_pick = random.sample(individual_match_list, 1)
         return [person,random_pick[0]]
     except ValueError:
-        print('{} has no available matches, please run again'.format(person))
+        raise('{} has no available matches, please run again'.format(person))
     return None
 
 def grouped_for(iterable, n):
@@ -83,6 +86,10 @@ def create_today_matched(today_matched_list, n=2):
      for x, y in grouped_for(today_matched_list, n):
          pair = [x,y]
          write_csv_file('{0}_matches.csv'.format(date.today()), pair)
+
+def create_today_unmatched(unmatched_people_list):
+    for person in unmatched_people_list:
+        write_csv_file('{0}_unmatches.csv'.format(date.today()), person)
 
 def create_tuple_list(all_people_list, matched_people_json):
     tuple_list = []
@@ -100,6 +107,7 @@ def sort_tuple_list(tuple_list):
 def main(args):
     path_to_coffee = args.path_to_coffee
     path_to_matched = args.matched_json
+    slack = args.slack
 
     all_people_list = flat_list(list(read_csv_file(path_to_coffee)))
     matched_in_this_session = []
@@ -111,7 +119,7 @@ def main(args):
             tuple_list = create_tuple_list(all_people_list,matched_people_json)
             sorted_people_list = sort_tuple_list(tuple_list)
         except:
-            print('Only use the program generated matched_people.json file')
+            raise('Only use the program generated matched_people.json file')
     else:
        write_json_file()
        matched_people_json = read_json_file('matched_people.json')
@@ -135,15 +143,19 @@ def main(args):
         updated_json = update_current_json(matched_people_json, matched_in_this_session)
         write_json_file(updated_json)
 
-    """
-    TODO: 
-          1. Scalability?
-          2. Code cleaning
-    """
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Coffee roulette script, add csv file with member names and run')
     parser.add_argument("path_to_coffee", help="Path to people file.csv")
     parser.add_argument("--matched_json", help="If any people have been matched previously give path to the json")
+    parser.add_argument("--slack", help="Type 'YES' to match people only from slack poll message ")
+
 
     args = parser.parse_args()
     main(args)
+
+    "TODO: Filter if person selected few"
+    "TODO: Make unmatched csv file normal"
+    "TODO: Create file to instantly copy paste to slack"
+    "TODO: Cleanup repo and organise files"
+    "TODO: Create tests"
+    "TODO: Match based on interests"
