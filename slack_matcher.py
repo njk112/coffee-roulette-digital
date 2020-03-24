@@ -1,14 +1,18 @@
 import argparse
-from slack_reader import get_nice_slack_array 
+from slack_reader import get_nice_slack_array
 from coffee import *
+
 
 def preprocess_individual_group(people_list, matched_slack_json):
     try:
-        invidual_group_tuple_list = create_tuple_list(people_list, matched_slack_json)
+        invidual_group_tuple_list = create_tuple_list(
+            people_list, matched_slack_json)
         sorted_people_list = sort_tuple_list(invidual_group_tuple_list)
     except:
         sorted_people_list = people_list.copy()
+
     return sorted_people_list
+
 
 def match_individual_group(sorted_people_list, matched_slack_json):
     all_people_list = sorted_people_list.copy()
@@ -16,7 +20,8 @@ def match_individual_group(sorted_people_list, matched_slack_json):
     unmatched_in_this_function = []
     for person in sorted_people_list:
         if person not in matched_in_this_function:
-            individual_match_list = invidual_preproc(person, all_people_list, matched_slack_json,matched_in_this_function)
+            individual_match_list = invidual_preproc(
+                person, all_people_list, matched_slack_json, matched_in_this_function)
             try:
                 matched_pair = coffee_roulette(person, individual_match_list)
             except:
@@ -32,18 +37,43 @@ def match_individual_group(sorted_people_list, matched_slack_json):
 
     return matched_in_this_function, unmatched_in_this_function
 
-def matcher(people_list, matched_people_json):
-        sorted_people_list = preprocess_individual_group(people_list, matched_people_json)
-        matched_people, unmatched_people = match_individual_group(sorted_people_list, matched_people_json)
-        return matched_people, unmatched_people
 
-def make_summary(matched_len, unmatched_len):
-    summary = "{0}\n☕️ COFFEE ROULETTE RESULTS ☕️\n{0}\n".format('='*30)
-    if matched_len > 0:
-        summary += "{} pairs matched\n".format(matched_len)
-    if unmatched_len > 0:
-        summary += "{} people unmatched\n".format(unmatched_len)
+def matcher(people_list, matched_people_json):
+    sorted_people_list = preprocess_individual_group(
+        people_list, matched_people_json)
+    matched_people, unmatched_people = match_individual_group(
+        sorted_people_list, matched_people_json)
+    return matched_people, unmatched_people
+
+
+def make_summary(matched_in_this_session, unmatched_in_this_session, matched_people_string):
+    matched, unmatched, matched_people, unmatched_people = "", "", "", ""
+    if len(matched_in_this_session) > 0:
+        matched = "\n{} pairs \033[92mmatched\033[0m".format(int(len(matched_in_this_session) /2))
+        matched_people += '\n{0}\n\033[93mPAIRS\033[0m\n{0}'.format('='*30)
+        matched_people += matched_people_string
+    if len(unmatched_in_this_session) > 0:
+        unmatched = "\n{} people \033[91munmatched\033[0m".format(
+            len(unmatched_in_this_session))
+        unmatched_in_this_session
+        unmatched_people += '\n{0}\n\033[93mALONE\033[0m\n{0}'.format('='*30)
+        for person in unmatched_in_this_session:
+            unmatched_people += "\n{}\n".format(person)
+
+    summary = "{0}\n☕️ \033[93mCOFFEE ROULETTE RESULTS\033[0m ☕️\n{0}{1}{2}{3}{4}".format(
+        '='*30, matched, unmatched, matched_people, unmatched_people)
+
     return summary
+
+def create_matched_people_string(people_list, current_string):
+    current_string += "\n{0}".format("-"*10)
+    if people_list:
+        for x, y in grouped_for(people_list, 2):
+            current_string += '\n@{0} + @{1}'.format(x, y)
+    else:
+        current_string += '\nNone'
+    current_string += "\n{0}".format("-"*10)
+    return current_string
 
 def main_slack(args):
     slack_path = args.slack_path
@@ -55,6 +85,7 @@ def main_slack(args):
     matched_outside_group = []
     outside_group = []
     unmatched_in_this_session = []
+    matched_people_string = ""
 
     if slack_json:
         try:
@@ -66,35 +97,43 @@ def main_slack(args):
         matched_people_json = read_json_file('matched_slack_people.json')
 
     for key in slack_keys:
-        matched_people, unmatched_people = matcher(slack_dict.get(key), matched_people_json)
-        matched_in_this_session += matched_people
-        outside_group += unmatched_people
-    
+        key_people_list = slack_dict.get(key)
+        matched_people_string += '\n\033[33m{0}\033[0m'.format(key)
+        if key_people_list:
+            matched_people, unmatched_people = matcher(
+                key_people_list, matched_people_json)
+            matched_people_string = create_matched_people_string(matched_people, matched_people_string)
+            matched_in_this_session += matched_people
+            outside_group += unmatched_people
+        else:
+           matched_people_string = create_matched_people_string(key_people_list, matched_people_string) 
+
     if outside_group:
-        outside_matches, outside_unmatches = matcher(outside_group, matched_people_json)
+        matched_people_string += "\n\033[93mMixed Group\033[0m"
+        outside_matches, outside_unmatches = matcher(
+            outside_group, matched_people_json)
+        matched_people_string = create_matched_people_string(outside_matches, matched_people_string)
         matched_in_this_session += outside_matches
         unmatched_in_this_session += outside_unmatches
 
-
     create_today_matched(matched_in_this_session)
-    updated_json = update_current_json(matched_people_json, matched_in_this_session)
+    updated_json = update_current_json(
+        matched_people_json, matched_in_this_session)
     write_json_file(updated_json, 'matched_slack_people.json')
 
     if unmatched_in_this_session:
-        print('hello')
         create_today_unmatched(unmatched_in_this_session)
 
-    summary = make_summary(len(matched_in_this_session), len(unmatched_in_this_session))
+    summary = make_summary(matched_in_this_session, unmatched_in_this_session, matched_people_string)
     print(summary)
 
-
-
-
-
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Coffee roulette script, add Slack txt file with info from polls')
-    parser.add_argument("slack_path", help="Enter slack path to match people only from slack poll message ")
-    parser.add_argument("--slack_json", help="Previously matched people from slack poll")
+    parser = argparse.ArgumentParser(
+        description='Coffee roulette script, add Slack txt file with info from polls')
+    parser.add_argument(
+        "slack_path", help="Enter slack path to match people only from slack poll message ")
+    parser.add_argument(
+        "--slack_json", help="Previously matched people from slack poll")
 
     args = parser.parse_args()
     main_slack(args)

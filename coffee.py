@@ -11,7 +11,7 @@ from operator import itemgetter
 ## Author: Naglis J. Kazlauskas
 ## Copyright: 2020, Coffee-roulette script
 ## Version: 1.0.0
-## Mmaintainer: Naglis J.Kazlauskas
+## Maintainer: Naglis J.Kazlauskas
 ## Email: naglis.kazlauskas@ibm.com
 ## Status: Testing phase
 ##################################################
@@ -20,8 +20,11 @@ def read_csv_file(path_to_file, new_line = ''):
     csv_file = csv.reader(open(path_to_file, newline=new_line))
     return csv_file
 
-def write_csv_file(file_name, pair, newline = '\n'):
-    csv.writer(open(file_name, 'a', newline=newline)).writerows([pair])
+def write_csv_file(file_name, pair, unmatched = False, newline = '\n'):
+    if unmatched is False:
+        csv.writer(open(file_name, 'a', newline=newline)).writerows([pair])
+    if unmatched:
+        csv.writer(open(file_name, 'a', newline=newline)).writerow([pair])
 
 def read_json_file(path_to_file):
     json_file = json.load(open(path_to_file, 'r'))
@@ -89,7 +92,7 @@ def create_today_matched(today_matched_list, n=2):
 
 def create_today_unmatched(unmatched_people_list):
     for person in unmatched_people_list:
-        write_csv_file('{0}_unmatches.csv'.format(date.today()), person)
+        write_csv_file('{0}_unmatches.csv'.format(date.today()), person, True)
 
 def create_tuple_list(all_people_list, matched_people_json):
     tuple_list = []
@@ -153,9 +156,9 @@ if __name__ == '__main__':
     args = parser.parse_args()
     main(args)
 
-    "TODO: Filter if person selected few"
-    "TODO: Make unmatched csv file normal"
     "TODO: Create file to instantly copy paste to slack"
+    "TODO: While printing summary show groups"
     "TODO: Cleanup repo and organise files"
     "TODO: Create tests"
     "TODO: Match based on interests"
+    "TODO: Add github repo link"
