@@ -5,10 +5,10 @@ import re
 
 def read_txt(path_to_txt):
     """Reads txt file
-    
+
     Arguments:
         path_to_txt {string} -- path to txt
-    
+
     Returns:
         file.read() -- file in reading format
     """
@@ -18,10 +18,10 @@ def read_txt(path_to_txt):
 
 def convert_to_array(slack_array):
     """Converts slack txt file into array
-    
+
     Arguments:
         slack_array {txt file} -- txt file with all info from slack
-    
+
     Returns:
         list -- list of rows from slack txt file
     """
@@ -30,10 +30,10 @@ def convert_to_array(slack_array):
 
 def fix_names_list(names_list):
     """Removes @ before names and whitespace around
-    
+
     Arguments:
         names_list {list} -- list of names with irrelevant signs from slack file
-    
+
     Returns:
         list -- list of names with removed signs
     """
@@ -46,16 +46,17 @@ def fix_names_list(names_list):
 
 def find_questions(slack_sorted_array):
     """Finds questions and people who answered to those questions in given slack txt file
-    
+
     Arguments:
         slack_sorted_array {list} -- array made from slack txt file
-    
+
     Returns:
         dict -- dictionary of question : list of people signed to that question
     """
     questions_dict, question_aswers = {}, {}
-    expression_emoji = ':[A-Za-z0-9_.-]+:' # Finds emojis
-    expression_people = '@[A-Za-z0-9_.-]*\s+[A-Za-z0-9_.-]*' # Finds people names
+    expression_emoji = ':[A-Za-z0-9_.-]+:'  # Finds emojis
+    # Finds people names
+    expression_people = '@[A-Za-z0-9_.-]*\s+[A-Za-z0-9_.-]*'
     row_position = 0
     for row in slack_sorted_array:
         if re.search(r'\bvotes\b', row):
@@ -75,10 +76,10 @@ def find_questions(slack_sorted_array):
 
 def check_for_duplicates(slack_dict):
     """Checks if any people voted several times
-    
+
     Arguments:
         slack_dict {dict} -- slack questions : list of people dictionary
-    
+
     Returns:
         list, dict -- list of all duplicated people, dict of person : list of questions answered
     """
@@ -99,15 +100,17 @@ def check_for_duplicates(slack_dict):
 
 
 "TODO: Fix this beauty sometime later"
+
+
 def remove_duplicates(duplicate_people, people_dict, slack_dict):
     """Removes people duplicate votes. Acknowledges if after removing person the question has enough people
        to match people evenly.
-    
+
     Arguments:
         duplicate_people {list} -- list of people who have voted several times
         people_dict {dict} -- dict of people who voted several times : questions they voted for
         slack_dict {dict} -- dict of questions : list of people who voted for them
-    
+
     Returns:
         [dict] -- dict of question : list of people who voted for it without duplicate people
     """
@@ -130,10 +133,11 @@ def remove_duplicates(duplicate_people, people_dict, slack_dict):
                     removal_list.append(tuple_item[0])
             else:
                 break
-        
+
         not_duplicate_slack_dict = slack_dict.copy()
         for removal_key in removal_list:
-            removal_people_list = not_duplicate_slack_dict.get(removal_key).remove(person)
+            removal_people_list = not_duplicate_slack_dict.get(
+                removal_key).remove(person)
             not_duplicate_slack_dict[removal_key] = removal_people_list
 
     return not_duplicate_slack_dict
@@ -141,10 +145,10 @@ def remove_duplicates(duplicate_people, people_dict, slack_dict):
 
 def get_nice_slack_array(path_to_slack_file):
     """Takes a slack txt file with text from voting polls and converts it into a dict of question : people who voted
-    
+
     Arguments:
         path_to_slack_file {string} -- path to slack txt file
-    
+
     Returns:
         dict -- question : list of people who voted for those questions
     """
@@ -157,4 +161,3 @@ def get_nice_slack_array(path_to_slack_file):
         nice_slack_file = removed_dupl_slack_file
 
     return nice_slack_file
-
