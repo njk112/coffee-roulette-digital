@@ -14,6 +14,7 @@ from operator import itemgetter
 ## Maintainer: Naglis J.Kazlauskas
 ## Email: naglis.kazlauskas@ibm.com
 ## Status: Testing phase
+## Github: https://github.ibm.com/Naglis-Kazlauskas/coffee-roulette
 ##################################################
 
 def read_csv_file(path_to_file, new_line = ''):
@@ -156,9 +157,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
     main(args)
 
-    "TODO: Create file to instantly copy paste to slack"
-    "TODO: While printing summary show groups"
     "TODO: Cleanup repo and organise files"
     "TODO: Create tests"
     "TODO: Match based on interests"
-    "TODO: Add github repo link"

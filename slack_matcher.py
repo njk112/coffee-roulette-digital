@@ -1,6 +1,7 @@
 import argparse
 from slack_reader import get_nice_slack_array
 from coffee import *
+from datetime import date
 
 
 def preprocess_individual_group(people_list, matched_slack_json):
@@ -46,7 +47,7 @@ def matcher(people_list, matched_people_json):
     return matched_people, unmatched_people
 
 
-def make_summary(matched_in_this_session, unmatched_in_this_session, matched_people_string):
+def make_summary(matched_in_this_session, unmatched_in_this_session, matched_people_string, slack_txt):
     matched, unmatched, matched_people, unmatched_people = "", "", "", ""
     if len(matched_in_this_session) > 0:
         matched = "\n{} pairs \033[92mmatched\033[0m".format(int(len(matched_in_this_session) /2))
@@ -57,13 +58,15 @@ def make_summary(matched_in_this_session, unmatched_in_this_session, matched_peo
             len(unmatched_in_this_session))
         unmatched_in_this_session
         unmatched_people += '\n{0}\n\033[93mALONE\033[0m\n{0}'.format('='*30)
+        slack_txt += '\n{0}\nALONE\n{0}'.format('='*30)
         for person in unmatched_in_this_session:
-            unmatched_people += "\n{}\n".format(person)
+            unmatched_people += "\n{}".format(person)
+            slack_txt += "\n@{}".format(person)
 
     summary = "{0}\n☕️ \033[93mCOFFEE ROULETTE RESULTS\033[0m ☕️\n{0}{1}{2}{3}{4}".format(
         '='*30, matched, unmatched, matched_people, unmatched_people)
 
-    return summary
+    return summary, slack_txt
 
 def create_matched_people_string(people_list, current_string):
     current_string += "\n{0}".format("-"*10)
@@ -74,6 +77,11 @@ def create_matched_people_string(people_list, current_string):
         current_string += '\nNone'
     current_string += "\n{0}".format("-"*10)
     return current_string
+
+def write_txt_file(summary):
+    file = open("{0}_paste_me_to_slack.txt".format(date.today()),"w")
+    file.write(summary)
+    file.close() 
 
 def main_slack(args):
     slack_path = args.slack_path
@@ -86,6 +94,7 @@ def main_slack(args):
     outside_group = []
     unmatched_in_this_session = []
     matched_people_string = ""
+    matched_people_txt = ""
 
     if slack_json:
         try:
@@ -98,22 +107,27 @@ def main_slack(args):
 
     for key in slack_keys:
         key_people_list = slack_dict.get(key)
+        matched_people_txt += "\n{0}".format(key)
         matched_people_string += '\n\033[33m{0}\033[0m'.format(key)
         if key_people_list:
             matched_people, unmatched_people = matcher(
                 key_people_list, matched_people_json)
             matched_people_string = create_matched_people_string(matched_people, matched_people_string)
             matched_in_this_session += matched_people
+            matched_people_txt = create_matched_people_string(matched_people, matched_people_txt)
             outside_group += unmatched_people
         else:
-           matched_people_string = create_matched_people_string(key_people_list, matched_people_string) 
+           matched_people_string = create_matched_people_string(key_people_list, matched_people_string)
+           matched_people_txt = create_matched_people_string(key_people_list, matched_people_txt) 
 
     if outside_group:
+        matched_people_txt += "\nMixed Group"
         matched_people_string += "\n\033[93mMixed Group\033[0m"
         outside_matches, outside_unmatches = matcher(
             outside_group, matched_people_json)
         matched_people_string = create_matched_people_string(outside_matches, matched_people_string)
         matched_in_this_session += outside_matches
+        matched_people_txt = create_matched_people_string(outside_matches, matched_people_txt) #fix this sometime later
         unmatched_in_this_session += outside_unmatches
 
     create_today_matched(matched_in_this_session)
@@ -124,7 +138,8 @@ def main_slack(args):
     if unmatched_in_this_session:
         create_today_unmatched(unmatched_in_this_session)
 
-    summary = make_summary(matched_in_this_session, unmatched_in_this_session, matched_people_string)
+    summary, matched_people_txt = make_summary(matched_in_this_session, unmatched_in_this_session, matched_people_string, matched_people_txt)
+    write_txt_file(matched_people_txt)
     print(summary)
 
 if __name__ == '__main__':
