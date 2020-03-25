@@ -158,5 +158,6 @@ if __name__ == '__main__':
     main(args)
 
     "TODO: Cleanup repo and organise files"
+    "TODO: Comment code"
     "TODO: Create tests"
     "TODO: Match based on interests"

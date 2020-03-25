@@ -85,7 +85,10 @@ def write_txt_file(summary):
 
 def main_slack(args):
     slack_path = args.slack_path
-    slack_json = args.slack_json
+    if args.slack_json:
+        slack_json = args.slack_json
+    else:
+        slack_json = None
     slack_dict = get_nice_slack_array(slack_path)
     slack_keys = [*slack_dict]
 
@@ -102,8 +105,8 @@ def main_slack(args):
         except:
             raise('Only use the program generated matched_slack_people.json file')
     else:
-        write_json_file(None, 'matched_slack_people.json')
-        matched_people_json = read_json_file('matched_slack_people.json')
+        write_json_file(None, 'matched_people.json')
+        matched_people_json = read_json_file('matched_people.json')
 
     for key in slack_keys:
         key_people_list = slack_dict.get(key)
@@ -133,7 +136,10 @@ def main_slack(args):
     create_today_matched(matched_in_this_session)
     updated_json = update_current_json(
         matched_people_json, matched_in_this_session)
-    write_json_file(updated_json, 'matched_slack_people.json')
+    if slack_json:
+        write_json_file(updated_json, slack_json)
+    else:
+        write_json_file(updated_json, 'matched_people.json')
 
     if unmatched_in_this_session:
         create_today_unmatched(unmatched_in_this_session)
