@@ -62,7 +62,11 @@ def create_today_unmatched(unmatched_people_list):
 def create_tuple_list(all_people_list, matched_people_json):
     tuple_list = []
     for person in all_people_list:
-        tuple_list.append((person, len(matched_people_json.get(person))))
+        person_from_json = matched_people_json.get(person)
+        if person_from_json:
+            tuple_list.append((person, len(person_from_json)))
+        else:
+            tuple_list.append((person, 0))
     return tuple_list
 
 def sort_tuple_list(tuple_list):

@@ -1,7 +1,9 @@
 import argparse
 from slack_reader import get_nice_slack_array
-from util import *
+from util import (read_json_file, write_json_file, matcher, create_matched_people_string,
+                  create_today_matched, update_current_json, create_today_unmatched, make_summary, write_txt_file)
 from datetime import date
+
 
 def main_slack(args):
     slack_path = args.slack_path
@@ -35,22 +37,28 @@ def main_slack(args):
         if key_people_list:
             matched_people, unmatched_people = matcher(
                 key_people_list, matched_people_json)
-            matched_people_string = create_matched_people_string(matched_people, matched_people_string)
+            matched_people_string = create_matched_people_string(
+                matched_people, matched_people_string)
             matched_in_this_session += matched_people
-            matched_people_txt = create_matched_people_string(matched_people, matched_people_txt)
+            matched_people_txt = create_matched_people_string(
+                matched_people, matched_people_txt)
             outside_group += unmatched_people
         else:
-           matched_people_string = create_matched_people_string(key_people_list, matched_people_string)
-           matched_people_txt = create_matched_people_string(key_people_list, matched_people_txt) 
+            matched_people_string = create_matched_people_string(
+                key_people_list, matched_people_string)
+            matched_people_txt = create_matched_people_string(
+                key_people_list, matched_people_txt)
 
     if outside_group:
         matched_people_txt += "\nMixed Group"
         matched_people_string += "\n\033[93mMixed Group\033[0m"
         outside_matches, outside_unmatches = matcher(
             outside_group, matched_people_json)
-        matched_people_string = create_matched_people_string(outside_matches, matched_people_string)
+        matched_people_string = create_matched_people_string(
+            outside_matches, matched_people_string)
         matched_in_this_session += outside_matches
-        matched_people_txt = create_matched_people_string(outside_matches, matched_people_txt) #fix this sometime later
+        matched_people_txt = create_matched_people_string(
+            outside_matches, matched_people_txt)  # fix this sometime later
         unmatched_in_this_session += outside_unmatches
 
     create_today_matched(matched_in_this_session)
@@ -64,9 +72,11 @@ def main_slack(args):
     if unmatched_in_this_session:
         create_today_unmatched(unmatched_in_this_session)
 
-    summary, matched_people_txt = make_summary(matched_in_this_session, unmatched_in_this_session, matched_people_string, matched_people_txt)
+    summary, matched_people_txt = make_summary(
+        matched_in_this_session, unmatched_in_this_session, matched_people_string, matched_people_txt)
     write_txt_file(matched_people_txt)
     print(summary)
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(

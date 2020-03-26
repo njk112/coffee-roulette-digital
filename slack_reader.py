@@ -59,7 +59,7 @@ def find_questions(slack_sorted_array):
     expression_people = '@[A-Za-z0-9_.-]*\s+[A-Za-z0-9_.-]*'
     row_position = 0
     for row in slack_sorted_array:
-        if re.search(r'\bvotes\b', row):
+        if re.search(r'\bvotes\b', row) or re.search(r'\bvote\b', row):
             specific_question = questions_dict.get(str(row_position-1))
             people_list = re.findall(expression_people, row + " ")
             updated_people_list = fix_names_list(people_list)
