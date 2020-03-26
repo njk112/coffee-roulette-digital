@@ -11,19 +11,19 @@ More files outputed after the script finished running.
 > No you do not. The only thing you have to do is to copy and paste information form the slack
 > poll into the Slack.txt and script will automatically detect people and match them accordingly.
 2. If I am using the original coffee script without slack polls what do I need to know?
-> Now there will be 3 files outputed: 2 csv files for todays matches and unmatches and 1 txt file
+> Now there will be <b>3 files outputed</b>: 2 csv files for todays matches and unmatches and 1 txt file
 > which contains ready to copy paste information directly into slack. However, if on Slack people have
 > different names/tags than the ones in your people_list.csv file then you need to review matches pairs
 > to see if output tags are the equal between slack.txt and actual slack channel.
 3. How did the original script running command changed?
-> Now to run the original script you would enter:
-```python3 coffee.py --path_to_coffee_csv people_list.csv```
-> or if you are using historical match data
+> Now to run the original script you would enter:<br/>
+```python3 coffee.py --path_to_coffee_csv people_list.csv```<br/>
+> or if you are using historical match data<br/>
 ```python3 coffee.py --path_to_coffee_csv people_list.csv --matched_json matched_people.json```
 4. How do I run the Slack script?
-> Firsly you have to copy paste information from slack poll to slack.txt and then run the following commands
-```python3 coffee.py --slack_path slack.txt```
->or if yu are using historical data
+> Firsly you have to copy paste information from slack poll to slack.txt and then run the following commands<br/>
+```python3 coffee.py --slack_path slack.txt```<br/>
+>or if yu are using historical data<br/>
 ```python3 coffee.py --slack_path slack.txt --matched_json matched_people.json```
 
 ### Changes:
@@ -93,14 +93,14 @@ All people are matched depending on how they answered a specific question. Slyth
 * Coffee.py running commands have changed:
 * Coffee.py original script now shows the output in terminal.
 
-Everyone who is using script with their own csv file with people names:
-<b> CSV file commands </b>
-```python3 coffee.py --path_to_coffee_csv people_list.csv```
-```python3 coffee.py --path_to_coffee_csv people_list.csv --matched_json matched_people.json```
+Everyone who is using script with their own csv file with people names:<br/>
+<b> CSV file commands </b><br/>
+>```python3 coffee.py --path_to_coffee_csv people_list.csv``` <br/>
+>```python3 coffee.py --path_to_coffee_csv people_list.csv --matched_json matched_people.json```
 
-Who wants to use information from slack polls:
-<b>Slack txt file commands</b>
-```python3 coffee.py --slack_path slack.txt```
+Who wants to use information from slack polls:<br/>
+<b>Slack txt file commands</b><br/>
+```python3 coffee.py --slack_path slack.txt```<br/>
 ```python3 coffee.py --slack_path slack.txt --matched_json matched_people.json```
 
 * Bug Fixes
