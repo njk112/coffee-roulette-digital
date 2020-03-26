@@ -3,6 +3,9 @@
 Now you can use coffee script with information from slack polls and match people based on their answers.
 Script commands have changed.
 More files outputed after the script finished running.
+
+![Terminal V1.1](coffee1.gif)
+
 ### FAQ
 1. Do I still need fill in people_list.csv if I am using information from the Slack polls?
 > No you do not. The only thing you have to do is to copy and paste information form the slack
